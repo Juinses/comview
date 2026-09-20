@@ -1,0 +1,18 @@
+@import "tailwindcss";
+
+@theme {
+  /* Paleta "Jardín de Lavanda" */
+  --color-com-bg: #FDFBF7;
+  --color-com-text: #3A3535;
+  --color-com-accent: #8BA888;
+  --color-com-action: #7A5C76;
+
+  /* Tipografías */
+  --font-serif: "Merriweather", serif;
+  --font-sans: "Inter", sans-serif;
+}
+
+body {
+  background-color: var(--color-com-bg);
+  color: var(--color-com-text);
+}
