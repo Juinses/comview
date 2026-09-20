@@ -1,25 +1,51 @@
-import React from 'react';
+// src/components/ComissionCard.jsx
+import React, { useContext } from 'react';
+import { ContextoEncargos } from '../contexto/encargos_context';
+import { useDraggable } from '@dnd-kit/core';
+import { CSS } from '@dnd-kit/utilities';
 
-export default function ComissionCard({ encargo, on_avanzar, on_archivar, on_restaurar, vista_actual }) {
+export default function ComissionCard({ encargo, vista_actual, al_seleccionar }) {
+  const { avanzar_fase, archivar_encargo, restaurar_encargo } = useContext(ContextoEncargos);
   const fases = ['Boceto', 'Lineart', 'Color', 'Terminado'];
   const esta_terminado = encargo.fase === fases.length - 1;
 
+  const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
+    id: encargo.id,
+    disabled: vista_actual === 'historial'
+  });
+
+  const estilo_movimiento = {
+    transform: isDragging 
+      ? `${CSS.Translate.toString(transform)} rotate(3deg) scale(1.02)` 
+      : CSS.Translate.toString(transform),
+    transition: isDragging ? 'none' : 'all 0.3s cubic-bezier(0.25, 1, 0.5, 1)',
+    opacity: isDragging ? 0.9 : 1,
+    zIndex: isDragging ? 50 : 1,
+    boxShadow: isDragging ? '0 25px 50px -12px rgba(0, 0, 0, 0.15)' : '',
+  };
+
   return (
-    <div className={`bg-white rounded-2xl p-6 max-w-sm w-full border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] transition-all hover:-translate-y-1 flex flex-col h-full relative group ${vista_actual === 'historial' ? 'opacity-80 hover:opacity-100' : ''}`}>
-      
-      {/* Botón dinámico: Archivar o Restaurar */}
+    <div 
+      ref={setNodeRef} 
+      style={estilo_movimiento}
+      {...listeners} 
+      {...attributes}
+      onClick={() => al_seleccionar(encargo)}
+      className={`bg-white rounded-2xl p-6 w-full border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] transition-all flex flex-col h-full relative group ${vista_actual === 'historial' ? 'opacity-80 hover:opacity-100' : 'cursor-grab active:cursor-grabbing shadow-sm hover:shadow-md'}`}
+    > 
+      {/* Botón dinámico: Archivar o Restaurar (Protegido con stopPropagation) */}
       {vista_actual === 'activas' ? (
         <button 
-          onClick={() => on_archivar(encargo.id)}
-          className="absolute top-4 right-4 p-1.5 text-gray-300 hover:bg-red-50 hover:text-red-400 rounded-lg transition-all opacity-0 group-hover:opacity-100"
+          onClick={(e) => { e.stopPropagation(); archivar_encargo(encargo.id); }}
+          className="absolute top-4 right-4 p-1.5 text-gray-300 hover:bg-red-50 hover:text-red-400 rounded-lg transition-all opacity-0 group-hover:opacity-100 z-10"
           title="Archivar encargo"
         >
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
         </button>
       ) : (
         <button 
-          onClick={() => on_restaurar(encargo.id)}
-          className="absolute top-4 right-4 p-1.5 text-gray-300 hover:bg-green-50 hover:text-green-500 rounded-lg transition-all opacity-0 group-hover:opacity-100"
+          onClick={(e) => { e.stopPropagation(); restaurar_encargo(encargo.id); }}
+          className="absolute top-4 right-4 p-1.5 text-gray-300 hover:bg-green-50 hover:text-green-500 rounded-lg transition-all opacity-0 group-hover:opacity-100 z-10"
           title="Restaurar al tablero"
         >
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
@@ -53,9 +79,9 @@ export default function ComissionCard({ encargo, on_avanzar, on_archivar, on_res
         </div>
       </div>
 
-      {/* Si está en el historial, deshabilitamos el botón de avanzar para que sea solo vista */}
+      {/* Botón para avanzar fase (Protegido con stopPropagation) */}
       <button 
-        onClick={() => on_avanzar(encargo.id)}
+        onClick={(e) => { e.stopPropagation(); avanzar_fase(encargo.id); }}
         disabled={esta_terminado || vista_actual === 'historial'}
         className={`w-full font-sans font-medium py-3 rounded-xl transition-all flex justify-center items-center gap-2
           ${(esta_terminado || vista_actual === 'historial')

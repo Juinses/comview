@@ -1,8 +1,22 @@
-import React from 'react';
+// src/components/Header.jsx
+import React, { useContext } from 'react';
+import { ContextoEncargos } from '../contexto/encargos_context';
+import { descargar_respaldo } from '../servicios/respaldo';
 
 export default function Header({ mostrar_formulario, set_mostrar_formulario, vista_actual, set_vista_actual }) {
+  // Extraemos los encargos directamente del contexto global
+  const { encargos } = useContext(ContextoEncargos);
+
+  const manejar_respaldo = () => {
+    if (encargos.length === 0) {
+      alert("No hay encargos para respaldar aún.");
+      return;
+    }
+    descargar_respaldo(encargos);
+  };
+
   return (
-    <nav className="relative z-10 w-full max-w-5xl mx-auto px-6 py-4 mt-2">
+    <nav className="relative z-10 w-full max-w-[1400px] mx-auto px-6 py-4 mt-2">
       <div className="bg-white/60 backdrop-blur-md border border-white/40 shadow-sm rounded-2xl flex justify-between items-center px-6 py-3">
         
         <div className="flex items-center gap-2 cursor-pointer">
@@ -13,7 +27,7 @@ export default function Header({ mostrar_formulario, set_mostrar_formulario, vis
 
         <div className="hidden md:flex gap-8 items-center">
           
-          {/* Botón: Mis Encargos */}
+          {/* Botón: Mis Encargos (Activas) */}
           <button 
             onClick={() => set_vista_actual('activas')}
             className={`flex flex-col items-center gap-1 group transition-colors ${vista_actual === 'activas' ? 'text-[var(--color-com-action)]' : 'text-gray-400 hover:text-[var(--color-com-text)]'}`}
@@ -22,7 +36,7 @@ export default function Header({ mostrar_formulario, set_mostrar_formulario, vis
             <span className="text-[10px] uppercase font-bold tracking-wider">Activas</span>
           </button>
           
-          {/* Botón: Historial (Antes Galería) */}
+          {/* Botón: Historial */}
           <button 
             onClick={() => set_vista_actual('historial')}
             className={`flex flex-col items-center gap-1 group transition-colors ${vista_actual === 'historial' ? 'text-[var(--color-com-action)]' : 'text-gray-400 hover:text-[var(--color-com-text)]'}`}
@@ -31,15 +45,20 @@ export default function Header({ mostrar_formulario, set_mostrar_formulario, vis
             <span className="text-[10px] uppercase font-bold tracking-wider">Historial</span>
           </button>
           
-          <button className="flex flex-col items-center gap-1 text-gray-400 hover:text-[var(--color-com-text)] group transition-colors">
-            <svg className="w-5 h-5 group-hover:-translate-y-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
-            <span className="text-[10px] uppercase font-bold tracking-wider">Perfil</span>
+          {/* NUEVO Botón: Respaldar Datos */}
+          <button 
+            onClick={manejar_respaldo}
+            className="flex flex-col items-center gap-1 text-gray-400 hover:text-[var(--color-com-accent)] group transition-colors"
+            title="Descargar copia de seguridad"
+          >
+            <svg className="w-5 h-5 group-hover:-translate-y-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+            <span className="text-[10px] uppercase font-bold tracking-wider">Respaldar</span>
           </button>
         </div>
 
         <button 
           onClick={() => set_mostrar_formulario(!mostrar_formulario)}
-          className="bg-[var(--color-com-action)] text-white text-sm font-medium px-4 py-2 rounded-xl hover:opacity-90 transition-opacity"
+          className="bg-[var(--color-com-action)] text-white text-sm font-medium px-4 py-2 rounded-xl hover:opacity-90 transition-opacity shadow-sm"
         >
           {mostrar_formulario ? 'Cancelar' : '+ Nuevo Encargo'}
         </button>
