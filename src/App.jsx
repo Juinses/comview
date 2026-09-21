@@ -5,16 +5,16 @@ import CommissionForm from './components/CommissionForm';
 import ComissionCard from './components/ComissionCard';
 import KanbanColumn from './components/KanbanColumn';
 import EncargoModal from './components/EncargoModal';
+import Login from './components/Login'; // <-- Importamos la barrera de seguridad
 import { LeafTopLeft, LeafBottomRight } from './components/BackgroundLeaves';
 
-// Importamos el estado global y las físicas de Drag & Drop
 import { ContextoEncargos } from './contexto/encargos_context';
 import { DndContext, MouseSensor, TouchSensor, useSensor, useSensors, closestCenter } from '@dnd-kit/core';
 
 function App() {
-  const { encargos, guardar_encargo, mover_encargo } = useContext(ContextoEncargos);
+  // Extraemos usuario y cargando del contexto
+  const { encargos, guardar_encargo, mover_encargo, usuario, cargando } = useContext(ContextoEncargos);
 
-  // Estados visuales puros de la interfaz
   const [mostrar_formulario, set_mostrar_formulario] = useState(false);
   const [vista_actual, set_vista_actual] = useState('activas');
   const [encargo_seleccionado, set_encargo_seleccionado] = useState(null);
@@ -45,6 +45,16 @@ function App() {
   };
 
   const nombres_fases = ['Boceto', 'Lineart', 'Color', 'Terminado'];
+
+  // BARRERA 1: Mostramos mensaje mientras Supabase verifica la sesión
+  if (cargando) {
+    return <div className="min-h-screen bg-[var(--color-com-bg)] flex items-center justify-center font-sans text-gray-500">Conectando bóveda segura...</div>;
+  }
+
+  // BARRERA 2: Si no hay usuario, mostramos el Login
+  if (!usuario) {
+    return <Login />;
+  }
 
   return (
     <div className="min-h-screen bg-[var(--color-com-bg)] relative overflow-hidden flex flex-col">

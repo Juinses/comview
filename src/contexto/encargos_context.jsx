@@ -1,60 +1,67 @@
 // src/contexto/encargos_context.jsx
 import React, { createContext, useState, useEffect } from 'react';
-import { obtener_encargos, guardar_encargos } from '../servicios/almacenamiento';
+import { obtener_encargos, crear_encargo, actualizar_estado_encargo } from '../servicios/almacenamiento';
+import { obtener_usuario_actual } from '../servicios/autenticacion';
 
-// 1. Creamos el contexto (la frecuencia de radio)
 export const ContextoEncargos = createContext();
 
-// 2. Creamos el Proveedor (la antena que emite la señal)
 export const ProveedorEncargos = ({ children }) => {
-  // Movemos toda la lógica de datos aquí adentro
-  const [encargos, set_encargos] = useState(() => obtener_encargos());
+  const [encargos, set_encargos] = useState([]);
+  const [usuario, set_usuario] = useState(null);
+  const [cargando, set_cargando] = useState(true);
 
   useEffect(() => {
-    guardar_encargos(encargos);
-  }, [encargos]);
-
-  const avanzar_fase = (id_encargo) => {
-    set_encargos(encargos.map(encargo => {
-      if (encargo.id === id_encargo && encargo.fase < 3) {
-        return { ...encargo, fase: encargo.fase + 1 };
+    const cargar_datos = async () => {
+      const user = await obtener_usuario_actual();
+      set_usuario(user);
+      if (user) {
+        const data = await obtener_encargos();
+        set_encargos(data);
       }
-      return encargo;
-    }));
+      set_cargando(false);
+    };
+    cargar_datos();
+  }, []);
+
+  const guardar_encargo = async (nuevo_encargo) => {
+    if (!usuario) return;
+    const creado = await crear_encargo(nuevo_encargo, usuario.id);
+    set_encargos([creado, ...encargos]);
   };
 
-  const archivar_encargo = (id_encargo) => {
-    set_encargos(encargos.map(encargo => 
-      encargo.id === id_encargo ? { ...encargo, es_historial: true } : encargo
-    ));
+  const mover_encargo = async (id_encargo, nueva_fase) => {
+    set_encargos(prev => prev.map(e => e.id === id_encargo ? { ...e, fase: nueva_fase } : e));
+    await actualizar_estado_encargo(id_encargo, { fase: nueva_fase });
   };
 
-  const restaurar_encargo = (id_encargo) => {
-    set_encargos(encargos.map(encargo => 
-      encargo.id === id_encargo ? { ...encargo, es_historial: false } : encargo
-    ));
+  const avanzar_fase = async (id_encargo) => {
+    const encargo = encargos.find(e => e.id === id_encargo);
+    if (encargo && encargo.fase < 3) {
+      const nueva_fase = encargo.fase + 1;
+      set_encargos(prev => prev.map(e => e.id === id_encargo ? { ...e, fase: nueva_fase } : e));
+      await actualizar_estado_encargo(id_encargo, { fase: nueva_fase });
+    }
   };
 
-  const guardar_encargo = (nuevo_encargo) => {
-    const id_generado = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
-    set_encargos([...encargos, { ...nuevo_encargo, id: id_generado, fase: 0, es_historial: false }]);
-  };
-  
-  const mover_encargo = (id_encargo, nueva_fase) => {
-    set_encargos(encargos.map(encargo => 
-      encargo.id === id_encargo ? { ...encargo, fase: nueva_fase } : encargo
-    ));
+  const archivar_encargo = async (id_encargo) => {
+    set_encargos(prev => prev.map(e => e.id === id_encargo ? { ...e, es_historial: true } : e));
+    await actualizar_estado_encargo(id_encargo, { es_historial: true });
   };
 
-  // 3. Empaquetamos todo lo que queremos "transmitir" en un objeto `value`
+  const restaurar_encargo = async (id_encargo) => {
+    set_encargos(prev => prev.map(e => e.id === id_encargo ? { ...e, es_historial: false } : e));
+    await actualizar_estado_encargo(id_encargo, { es_historial: false });
+  };
+
+  // Vuelve a pedir el usuario a Supabase (para reflejar cambios de perfil recién guardados)
+  const refrescar_usuario = async () => {
+    const user = await obtener_usuario_actual();
+    set_usuario(user);
+  };
+
   return (
     <ContextoEncargos.Provider value={{
-      encargos,
-      avanzar_fase,
-      archivar_encargo,
-      restaurar_encargo,
-      guardar_encargo,
-      mover_encargo,
+      encargos, guardar_encargo, mover_encargo, avanzar_fase, archivar_encargo, restaurar_encargo, usuario, cargando, refrescar_usuario
     }}>
       {children}
     </ContextoEncargos.Provider>

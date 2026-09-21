@@ -1,3 +1,4 @@
+// src/components/CommissionForm.jsx
 import React, { useState } from 'react';
 
 export default function CommissionForm({ on_guardar }) {
@@ -34,7 +35,8 @@ export default function CommissionForm({ on_guardar }) {
 
         <div className="md:col-span-2">
           <label className="block font-sans text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Fecha de Entrega</label>
-          <input required type="text" maxLength="15" placeholder="Ej: 10 Nov, 2026" 
+          {/* AQUÍ ESTÁ EL CAMBIO AL SELECTOR DE FECHA */}
+          <input required type="date" 
             className="w-full bg-[#FDFBF7] border border-gray-200 text-[var(--color-com-text)] p-3 rounded-xl outline-none focus:ring-2 focus:ring-[var(--color-com-accent)] font-sans text-sm transition-all" 
             value={nuevo_encargo.fecha} onChange={e => set_nuevo_encargo({...nuevo_encargo, fecha: e.target.value})} />
         </div>

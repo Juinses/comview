@@ -2,17 +2,28 @@
 import React, { useContext } from 'react';
 import { ContextoEncargos } from '../contexto/encargos_context';
 import { descargar_respaldo } from '../servicios/respaldo';
+import { cliente_supabase } from '../servicios/supabase_cliente';
+import MenuPerfil from './MenuPerfil';
 
 export default function Header({ mostrar_formulario, set_mostrar_formulario, vista_actual, set_vista_actual }) {
-  // Extraemos los encargos directamente del contexto global
   const { encargos } = useContext(ContextoEncargos);
 
   const manejar_respaldo = () => {
-    if (encargos.length === 0) {
+    if (!encargos || encargos.length === 0) {
       alert("No hay encargos para respaldar aún.");
       return;
     }
     descargar_respaldo(encargos);
+  };
+
+  const manejar_salida = async () => {
+    try {
+      const { error } = await cliente_supabase.auth.signOut();
+      if (error) throw error;
+      window.location.reload();
+    } catch (error) {
+      alert("Error al cerrar sesión: " + error.message);
+    }
   };
 
   return (
@@ -27,7 +38,6 @@ export default function Header({ mostrar_formulario, set_mostrar_formulario, vis
 
         <div className="hidden md:flex gap-8 items-center">
           
-          {/* Botón: Mis Encargos (Activas) */}
           <button 
             onClick={() => set_vista_actual('activas')}
             className={`flex flex-col items-center gap-1 group transition-colors ${vista_actual === 'activas' ? 'text-[var(--color-com-action)]' : 'text-gray-400 hover:text-[var(--color-com-text)]'}`}
@@ -36,7 +46,6 @@ export default function Header({ mostrar_formulario, set_mostrar_formulario, vis
             <span className="text-[10px] uppercase font-bold tracking-wider">Activas</span>
           </button>
           
-          {/* Botón: Historial */}
           <button 
             onClick={() => set_vista_actual('historial')}
             className={`flex flex-col items-center gap-1 group transition-colors ${vista_actual === 'historial' ? 'text-[var(--color-com-action)]' : 'text-gray-400 hover:text-[var(--color-com-text)]'}`}
@@ -45,7 +54,6 @@ export default function Header({ mostrar_formulario, set_mostrar_formulario, vis
             <span className="text-[10px] uppercase font-bold tracking-wider">Historial</span>
           </button>
           
-          {/* NUEVO Botón: Respaldar Datos */}
           <button 
             onClick={manejar_respaldo}
             className="flex flex-col items-center gap-1 text-gray-400 hover:text-[var(--color-com-accent)] group transition-colors"
@@ -53,6 +61,17 @@ export default function Header({ mostrar_formulario, set_mostrar_formulario, vis
           >
             <svg className="w-5 h-5 group-hover:-translate-y-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
             <span className="text-[10px] uppercase font-bold tracking-wider">Respaldar</span>
+          </button>
+
+          <MenuPerfil />
+
+          <button
+            onClick={manejar_salida}
+            className="flex flex-col items-center gap-1 text-gray-400 hover:text-red-500 group transition-colors"
+            title="Cerrar sesión"
+          >
+            <svg className="w-5 h-5 group-hover:-translate-y-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
+            <span className="text-[10px] uppercase font-bold tracking-wider">Salir</span>
           </button>
         </div>
 
