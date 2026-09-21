@@ -10,16 +10,26 @@ export default function KanbanColumn({ id_columna, titulo, children }) {
   return (
     <div 
       ref={setNodeRef} 
-      className={`flex flex-col gap-4 p-4 rounded-3xl transition-colors duration-300 min-h-[300px] border-2 
-        ${isOver ? 'bg-[var(--color-com-bg)] border-dashed border-[var(--color-com-accent)]' : 'bg-transparent border-transparent'}`}
+      className={`flex flex-col rounded-3xl transition-all duration-300 min-h-[450px] overflow-hidden border border-[var(--color-com-border)]
+        ${isOver 
+          ? 'bg-[var(--color-com-surface-alt)] shadow-inner ring-2 ring-[var(--color-com-accent)]/40' 
+          : 'bg-[var(--color-com-card)] shadow-sm'
+        }`}
     >
-      <div className="flex items-center justify-between mb-2 px-2">
-        <h2 className="font-serif text-lg font-bold text-[var(--color-com-text)]">{titulo}</h2>
-        <span className="bg-gray-100 text-gray-500 text-xs px-2 py-1 rounded-full font-bold">
+      {/* Cabecera Orgánica de la columna */}
+      <div className="bg-[var(--color-com-accent)] py-3 px-5 flex items-center justify-between">
+        <h2 className="font-sans text-lg font-bold text-white tracking-wide">
+          {titulo}
+        </h2>
+        <span className="bg-white/20 text-white text-xs px-2.5 py-1 rounded-full font-bold shadow-sm">
           {React.Children.count(children)}
         </span>
       </div>
-      {children}
+      
+      {/* Zona de soltar tarjetas (cuerpo de la columna) */}
+      <div className="flex-1 p-4 flex flex-col gap-4 overflow-y-auto">
+        {children}
+      </div>
     </div>
   );
 }

@@ -1,18 +1,42 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Lora:ital,wght@0,400;0,600;1,400&display=swap');
 @import "tailwindcss";
 
 @theme {
-  /* Paleta "Jardín de Lavanda" */
-  --color-com-bg: #FDFBF7;
-  --color-com-text: #3A3535;
-  --color-com-accent: #8BA888;
-  --color-com-action: #7A5C76;
-
-  /* Tipografías */
-  --font-serif: "Merriweather", serif;
+  /* Lienzos y Superficies */
+  --color-com-bg: #FAF7F2;
+  --color-com-card: #FDFBF7;
+  --color-com-surface-alt: #EFEFEA;
+  
+  /* Textos y Acentos */
+  --color-com-text: #2C2623;
+  --color-com-muted: #7A726C;
+  --color-com-accent: #8A9A86;
+  --color-com-accent-dark: #4F5B4C;
+  
+  /* Acciones (Botones) */
+  --color-com-action: #5C3A58;
+  --color-com-action-hover: #4A2E47;
+  
+  /* Detalles estructurales */
+  --color-com-border: #ECE6DD;
+  --color-com-divider: #F0EBE1;
+  
+  /* Sombras y Tipografía */
+  --shadow-warm: 0 10px 30px -5px rgba(92, 58, 88, 0.08);
+  --font-serif: "Lora", serif;
   --font-sans: "Inter", sans-serif;
 }
 
 body {
   background-color: var(--color-com-bg);
   color: var(--color-com-text);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Transiciones globales suaves para mayor comodidad visual */
+* {
+  transition-property: color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 200ms;
 }

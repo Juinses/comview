@@ -34,6 +34,14 @@ export const ProveedorEncargos = ({ children }) => {
     await actualizar_estado_encargo(id_encargo, { fase: nueva_fase });
   };
 
+  // Agrega esta función debajo de mover_encargo o avanzar_fase
+  const actualizar_encargo = async (id_encargo, datos_nuevos) => {
+    // 1. Actualización optimista: la interfaz cambia al instante
+    set_encargos(prev => prev.map(e => e.id === id_encargo ? { ...e, ...datos_nuevos } : e));
+    // 2. Guardado silencioso en Supabase
+    await actualizar_estado_encargo(id_encargo, datos_nuevos);
+  };
+
   const avanzar_fase = async (id_encargo) => {
     const encargo = encargos.find(e => e.id === id_encargo);
     if (encargo && encargo.fase < 3) {
@@ -61,7 +69,7 @@ export const ProveedorEncargos = ({ children }) => {
 
   return (
     <ContextoEncargos.Provider value={{
-      encargos, guardar_encargo, mover_encargo, avanzar_fase, archivar_encargo, restaurar_encargo, usuario, cargando, refrescar_usuario
+      encargos, guardar_encargo, mover_encargo, avanzar_fase, archivar_encargo, restaurar_encargo, actualizar_encargo, usuario, cargando
     }}>
       {children}
     </ContextoEncargos.Provider>
